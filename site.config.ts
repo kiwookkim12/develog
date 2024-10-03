@@ -10,8 +10,8 @@ export default siteConfig({
 
   // basic site info (required)
   name: 'Next.js Notion Starter Kit',
-  domain: 'nextjs-notion-starter-kit.transitivebullsh.it',
-  author: 'kiwook.kim',
+  domain: 'https://kiwi90.vercel.app/',
+  author: 'kiwookkim12',
 
   // open graph metadata (optional)
   description: 'Example Next.js Notion Starter Kit Site',
@@ -62,4 +62,28 @@ export default siteConfig({
   //     pageId: '6a29ebcb935a4f0689fe661ab5f3b8d1'
   //   }
   // ]
+
 })
+
+// // 2. site.config.ts 파일에 giscus 설정을 추가합니다
+// export interface SiteConfig {
+//   // ... 기존 설정들
+//     giscus: {
+//     enabled: boolean
+//     repo: string
+//     repoId: string
+//     category: string
+//     categoryId: string
+//   }
+// }
+
+// export const siteConfig: SiteConfig = {
+//   // ... 기존 설정들
+//     giscus: {
+//     enabled: true,
+//     repo: 'kiwookkim12/develog',
+//     repoId: 'kiwookkim12',
+//     category: 'Comments',
+//     categoryId: 'kiwookkim12'
+//   }
+// }

@@ -3,7 +3,6 @@ import dynamic from 'next/dynamic'
 import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
-
 import cs from 'classnames'
 import { PageBlock } from 'notion-types'
 import { formatDate, getBlockTitle, getPageProperty } from 'notion-utils'
@@ -11,14 +10,12 @@ import BodyClassName from 'react-body-classname'
 import { NotionRenderer } from 'react-notion-x'
 import TweetEmbed from 'react-tweet-embed'
 import { useSearchParam } from 'react-use'
-
 import * as config from '@/lib/config'
 import * as types from '@/lib/types'
 import { mapImageUrl } from '@/lib/map-image-url'
 import { getCanonicalPageUrl, mapPageUrl } from '@/lib/map-page-url'
 import { searchNotion } from '@/lib/search-notion'
 import { useDarkMode } from '@/lib/use-dark-mode'
-
 import { Footer } from './Footer'
 import { GitHubShareButton } from './GitHubShareButton'
 import { Loading } from './Loading'
@@ -26,12 +23,12 @@ import { NotionPageHeader } from './NotionPageHeader'
 import { Page404 } from './Page404'
 import { PageAside } from './PageAside'
 import { PageHead } from './PageHead'
+import { PageFooter } from './PageFooter'
 import styles from './styles.module.css'
 
 // -----------------------------------------------------------------------------
 // dynamic imports for optional components
 // -----------------------------------------------------------------------------
-
 const Code = dynamic(() =>
   import('react-notion-x/build/third-party/code').then(async (m) => {
     // add / remove any prism syntaxes here
@@ -71,7 +68,6 @@ const Code = dynamic(() =>
     return m.Code
   })
 )
-
 const Collection = dynamic(() =>
   import('react-notion-x/build/third-party/collection').then(
     (m) => m.Collection
@@ -96,11 +92,9 @@ const Modal = dynamic(
     ssr: false
   }
 )
-
 const Tweet = ({ id }: { id: string }) => {
   return <TweetEmbed tweetId={id} />
 }
-
 const propertyLastEditedTimeValue = (
   { block, pageHeader },
   defaultFn: () => React.ReactNode
@@ -110,27 +104,22 @@ const propertyLastEditedTimeValue = (
       month: 'long'
     })}`
   }
-
   return defaultFn()
 }
-
 const propertyDateValue = (
   { data, schema, pageHeader },
   defaultFn: () => React.ReactNode
 ) => {
   if (pageHeader && schema?.name?.toLowerCase() === 'published') {
     const publishDate = data?.[0]?.[1]?.[0]?.[1]?.start_date
-
     if (publishDate) {
       return `${formatDate(publishDate, {
         month: 'long'
       })}`
     }
   }
-
   return defaultFn()
 }
-
 const propertyTextValue = (
   { schema, pageHeader },
   defaultFn: () => React.ReactNode
@@ -138,10 +127,8 @@ const propertyTextValue = (
   if (pageHeader && schema?.name?.toLowerCase() === 'author') {
     return <b>{defaultFn()}</b>
   }
-
   return defaultFn()
 }
-
 export const NotionPage: React.FC<types.PageProps> = ({
   site,
   recordMap,
@@ -150,7 +137,6 @@ export const NotionPage: React.FC<types.PageProps> = ({
 }) => {
   const router = useRouter()
   const lite = useSearchParam('lite')
-
   const components = React.useMemo(
     () => ({
       nextImage: Image,
@@ -168,31 +154,23 @@ export const NotionPage: React.FC<types.PageProps> = ({
     }),
     []
   )
-
   // lite mode is for oembed
   const isLiteMode = lite === 'true'
-
   const { isDarkMode } = useDarkMode()
-
   const siteMapPageUrl = React.useMemo(() => {
     const params: any = {}
     if (lite) params.lite = lite
-
     const searchParams = new URLSearchParams(params)
     return mapPageUrl(site, recordMap, searchParams)
   }, [site, recordMap, lite])
-
   const keys = Object.keys(recordMap?.block || {})
   const block = recordMap?.block?.[keys[0]]?.value
-
   // const isRootPage =
   //   parsePageId(block?.id) === parsePageId(site?.rootNotionPageId)
   const isBlogPost =
     block?.type === 'page' && block?.parent_table === 'collection'
-
   const showTableOfContents = !!isBlogPost
   const minTableOfContentsItems = 3
-
   const pageAside = React.useMemo(
     () => (
       <PageAside block={block} recordMap={recordMap} isBlogPost={isBlogPost} />
@@ -200,18 +178,22 @@ export const NotionPage: React.FC<types.PageProps> = ({
     [block, recordMap, isBlogPost]
   )
 
+  const pageFooter = React.useMemo(
+    () => (
+      <PageFooter isBlogPost={isBlogPost} />
+    ),
+    [isBlogPost]
+  )
+
   const footer = React.useMemo(() => <Footer />, [])
 
   if (router.isFallback) {
     return <Loading />
   }
-
   if (error || !site || !block) {
     return <Page404 site={site} pageId={pageId} error={error} />
   }
-
   const title = getBlockTitle(block, recordMap) || site.name
-
   console.log('notion page', {
     isDev: config.isDev,
     title,
@@ -219,7 +201,6 @@ export const NotionPage: React.FC<types.PageProps> = ({
     rootNotionPageId: site.rootNotionPageId,
     recordMap
   })
-
   if (!config.isServer) {
     // add important objects to the window global for easy debugging
     const g = window as any
@@ -227,21 +208,17 @@ export const NotionPage: React.FC<types.PageProps> = ({
     g.recordMap = recordMap
     g.block = block
   }
-
   const canonicalPageUrl =
     !config.isDev && getCanonicalPageUrl(site, recordMap)(pageId)
-
   const socialImage = mapImageUrl(
     getPageProperty<string>('Social Image', block, recordMap) ||
       (block as PageBlock).format?.page_cover ||
       config.defaultPageCover,
     block
   )
-
   const socialDescription =
     getPageProperty<string>('Description', block, recordMap) ||
     config.description
-
   return (
     <>
       <PageHead
@@ -252,10 +229,8 @@ export const NotionPage: React.FC<types.PageProps> = ({
         image={socialImage}
         url={canonicalPageUrl}
       />
-
       {isLiteMode && <BodyClassName className='notion-lite' />}
       {isDarkMode && <BodyClassName className='dark-mode' />}
-
       <NotionRenderer
         bodyClassName={cs(
           styles.notion,
@@ -278,6 +253,7 @@ export const NotionPage: React.FC<types.PageProps> = ({
         mapImageUrl={mapImageUrl}
         searchNotion={config.isSearchEnabled ? searchNotion : null}
         pageAside={pageAside}
+        pageFooter={pageFooter}
         footer={footer}
       />
 
