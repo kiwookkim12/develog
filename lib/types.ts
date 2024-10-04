@@ -70,21 +70,3 @@ export interface NotionPageInfo {
   authorImage: string
   detail: string
 }
-
-// 기존 export 문 아래에 추가
-export interface SearchParams {
-  query?: string
-  pageId?: string
-  limit?: number
-}
-
-export interface SearchResults {
-  results: Array<{
-    id: string
-    title: string
-    description?: string
-    url?: string
-  }>
-  hasMore: boolean
-  nextCursor: string | null
-}
